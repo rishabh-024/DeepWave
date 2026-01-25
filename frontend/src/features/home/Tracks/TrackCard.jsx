@@ -1,0 +1,115 @@
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Pause, Music2 } from 'lucide-react';
+import PropTypes from 'prop-types';
+import { useAudioPlayer } from '../../../context/AudioContext';
+
+function TrackCard({ track, playlist }) {
+  const {
+    currentTrack,
+    isPlaying,
+    playTrack,
+    togglePlayPause
+  } = useAudioPlayer();
+
+  const isActive = currentTrack?._id === track?._id;
+  const showPause = isActive && isPlaying;
+
+  const handlePlayClick = () => {
+    if (isActive) {
+      togglePlayPause();
+    } else {
+      playTrack(track, playlist);
+    }
+  };
+
+  return (
+    <motion.div
+      layout
+      whileHover={{ y: -8 }}
+      className="group relative rounded-2xl overflow-hidden surface border border-surface backdrop-blur-xl hover:surface transition cursor-pointer"
+    >
+      {/* Cover */}
+      <div className="relative aspect-[4/5] overflow-hidden">
+        <img
+          src={track.cover || '/fallback-cover.png'}
+          alt={track.title || 'Soundscape'}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-80" />
+
+        {/* Play / Pause */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.button
+            onClick={handlePlayClick}
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 0.95 }}
+            className="h-14 w-14 rounded-full bg-white/20 backdrop-blur-lg grid place-items-center shadow-lg ring-1 ring-white/30"
+            aria-label={showPause ? 'Pause track' : 'Play track'}
+          >
+            <AnimatePresence mode="wait">
+              {showPause ? (
+                <motion.div
+                  key="pause"
+                  initial={{ scale: 0, rotate: -90 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  exit={{ scale: 0, rotate: 90 }}
+                >
+                  <Pause className="h-7 w-7 text-white" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="play"
+                  initial={{ scale: 0, rotate: -90 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  exit={{ scale: 0, rotate: 90 }}
+                >
+                  <Play className="h-7 w-7 text-white ml-1" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
+        </div>
+
+        {/* Active Indicator */}
+        {isActive && (
+          <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-violet-600/80 text-xs text-white font-medium">
+            Playing
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="p-4">
+        <h3 className="text-white font-semibold truncate">
+          {track.title || 'Untitled Sound'}
+        </h3>
+
+        <div className="flex items-center gap-2 mt-1 text-sm text-white/60">
+          <Music2 className="h-4 w-4 text-violet-400" />
+          <span className="capitalize truncate">
+            {track.category || 'Sound'}
+          </span>
+        </div>
+      </div>
+
+      {/* Hover Glow */}
+      <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition">
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-600/10 to-cyan-600/10" />
+      </div>
+    </motion.div>
+  );
+}
+
+TrackCard.propTypes = {
+  track: PropTypes.shape({
+    _id: PropTypes.string,
+    title: PropTypes.string,
+    cover: PropTypes.string,
+    category: PropTypes.string
+  }).isRequired,
+  playlist: PropTypes.array
+};
+
+export default TrackCard;
