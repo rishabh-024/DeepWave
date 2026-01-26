@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-DEEP WAVE | AI-Powered Sound Therapy Platform
+### DEEP WAVE | AI-Powered Sound Therapy Platform
 
 DEEP WAVE is a full-stack MERN application designed to provide a personalized sound therapy experience. This platform analyzes a user's emotional state from text input using AI and recommends a curated soundscape to help with stress and anger management.The application is built with a focus on a calm and therapeutic user experience, featuring a responsive front-end engineered with React.js and Tailwind CSS. The back-end is powered by Node.js and Express.js with MongoDB for data persistence. 
 This project demonstrates a comprehensive approach to building a modern, data-driven web application with a strong emphasis on user well-being.
@@ -97,4 +96,4 @@ See `backend/README.md` for API endpoints.
 - Winston logging with daily rotation
 - Health checks at `/healthz`
 - Error tracking (integrate with Sentry)
->>>>>>> master
+
