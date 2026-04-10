@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from "framer-motion";
+import { Link } from 'react-router-dom';
 import { 
   Sparkles, 
   Github, 
@@ -30,17 +31,25 @@ const SocialLink = ({ href, icon: Icon, label }) => (
   </motion.a>
 );
 
-const FooterLink = ({ href, children }) => (
-  <li>
-    <a
-      href={href}
-      className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-violet-600 dark:hover:text-white transition-colors duration-200 flex items-center group"
-    >
-      <ArrowRight className="h-3 w-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
-      {children}
-    </a>
-  </li>
-);
+const FooterLink = ({ href, children }) => {
+  const className = "text-sm text-zinc-500 dark:text-zinc-400 hover:text-violet-600 dark:hover:text-white transition-colors duration-200 flex items-center group";
+
+  return (
+    <li>
+      {href.startsWith('http') ? (
+        <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+          <ArrowRight className="h-3 w-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
+          {children}
+        </a>
+      ) : (
+        <Link to={href} className={className}>
+          <ArrowRight className="h-3 w-3 mr-2 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all duration-200" />
+          {children}
+        </Link>
+      )}
+    </li>
+  );
+};
 
 const Footer = () => {
   return (
@@ -95,19 +104,19 @@ const Footer = () => {
               <div>
                 <h3 className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-white">Product</h3>
                 <ul role="list" className="mt-6 space-y-4">
-                  <FooterLink href="/library">Sound Library</FooterLink>
-                  <FooterLink href="/studio">Wave Studio</FooterLink>
-                  <FooterLink href="/pricing">Premium Plans</FooterLink>
-                  <FooterLink href="/mobile">Mobile App</FooterLink>
+                  <FooterLink href="/#library">Sound Library</FooterLink>
+                  <FooterLink href="/dashboard">Wave Studio</FooterLink>
+                  <FooterLink href="/register">Premium Plans</FooterLink>
+                  <FooterLink href="/profile">Member Profile</FooterLink>
                 </ul>
               </div>
               <div className="mt-10 md:mt-0">
                 <h3 className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-white">Resources</h3>
                 <ul role="list" className="mt-6 space-y-4">
-                  <FooterLink href="/blog">Therapy Blog</FooterLink>
-                  <FooterLink href="/guides">User Guides</FooterLink>
-                  <FooterLink href="/science">The Science</FooterLink>
-                  <FooterLink href="/api">Developers</FooterLink>
+                  <FooterLink href="/#recommendations">Recommendations</FooterLink>
+                  <FooterLink href="/dashboard">Mood Tracking</FooterLink>
+                  <FooterLink href="/dashboard">Guided Sessions</FooterLink>
+                  <FooterLink href="https://github.com/rishabh-giri">Developer Profile</FooterLink>
                 </ul>
               </div>
             </div>
@@ -115,18 +124,18 @@ const Footer = () => {
               <div>
                 <h3 className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-white">Company</h3>
                 <ul role="list" className="mt-6 space-y-4">
-                  <FooterLink href="/about">Our Story</FooterLink>
-                  <FooterLink href="/careers">Careers</FooterLink>
-                  <FooterLink href="/press">Press Kit</FooterLink>
-                  <FooterLink href="/contact">Contact Us</FooterLink>
+                  <FooterLink href="/">Our Story</FooterLink>
+                  <FooterLink href="/register">Start Free</FooterLink>
+                  <FooterLink href="/login">Sign In</FooterLink>
+                  <FooterLink href="/profile">Contact Settings</FooterLink>
                 </ul>
               </div>
               <div className="mt-10 md:mt-0">
                 <h3 className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-white">Legal</h3>
                 <ul role="list" className="mt-6 space-y-4">
-                  <FooterLink href="/privacy">Privacy Policy</FooterLink>
-                  <FooterLink href="/terms">Terms of Service</FooterLink>
-                  <FooterLink href="/cookies">Cookie Settings</FooterLink>
+                  <FooterLink href="/register">Privacy First</FooterLink>
+                  <FooterLink href="/login">Secure Access</FooterLink>
+                  <FooterLink href="/profile">Account Controls</FooterLink>
                 </ul>
               </div>
             </div>

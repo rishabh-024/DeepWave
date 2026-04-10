@@ -1,4 +1,4 @@
-import api from './api';
+import api, { extractApiErrorMessage } from './api';
 
 const logMood = async (moodData) => {
   try {
@@ -6,7 +6,7 @@ const logMood = async (moodData) => {
     return response.data;
   } catch (error) {
     console.error("Failed to log mood:", error.response?.data || error.message);
-    throw error.response?.data || new Error("Failed to log mood");
+    throw new Error(extractApiErrorMessage(error, "Failed to log mood"));
   }
 };
 

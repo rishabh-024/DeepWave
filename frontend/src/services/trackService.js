@@ -1,53 +1,66 @@
 import api from './api';
+import { isPlaceholderCoverUrl } from '../utils/coverArt';
+
+const getBackendOrigin = () => (api.defaults.baseURL || '').replace(/\/api$/, '');
+
+const resolveAssetUrl = (value, fallback = '') => {
+  if (!value) {
+    return fallback;
+  }
+
+  if (/^https?:\/\//i.test(value) || value.startsWith('data:')) {
+    return value;
+  }
+
+  if (value.startsWith('/api')) {
+    return `${getBackendOrigin()}${value}`;
+  }
+
+  if (value.startsWith('/')) {
+    return `${getBackendOrigin()}${value}`;
+  }
+
+  return value;
+};
+
+export const normalizeTrack = (track, index = 0) => {
+  const id = track?._id ?? track?.id ?? `track-${index}`;
+  const storageUrl = track?.storageUrl ?? track?.audioUrl ?? track?.url ?? '';
+  const gridFsId = track?.gridFsId ?? track?.raw?.gridFsId ?? '';
+  const resolvedCover = resolveAssetUrl(track?.cover, '');
+
+  return {
+    _id: String(id),
+    title: String(track?.title ?? 'Untitled Soundscape'),
+    url: resolveAssetUrl(
+      storageUrl || (gridFsId ? `/api/sounds/stream/${gridFsId}` : ''),
+      ''
+    ),
+    cover: isPlaceholderCoverUrl(resolvedCover) ? '' : resolvedCover,
+    artist: track?.artist ?? track?.source ?? 'DeepWave',
+    category: track?.category ?? 'ambient',
+    durationSec: track?.durationSec ?? 0,
+    tags: Array.isArray(track?.tags) ? track.tags : [],
+    raw: track ?? {},
+  };
+};
+
+export const normalizeTrackList = (tracks = []) =>
+  tracks.map((track, index) => normalizeTrack(track, index));
 
 export const getAllTracks = async ({ signal } = {}) => {
   try {
     const response = await api.get('/tracks', { signal });
-
     const data = response?.data;
-    const tracksArray =
-      Array.isArray(data)
-        ? data
-        : Array.isArray(data?.tracks)
-        ? data.tracks
-        : Array.isArray(data?.data)
-        ? data.data
-        : [];
+    const tracksArray = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.tracks)
+      ? data.tracks
+      : Array.isArray(data?.data)
+      ? data.data
+      : [];
 
-    return tracksArray.map((t, i) => {
-      const id = t?._id ?? t?.id ?? `track-${i}`;
-      // Prefer storageUrl (backend Track model). If missing, try common fields or construct GridFS stream URL
-      const storageUrl = t?.storageUrl ?? t?.audioUrl ?? t?.url ?? '';
-      const gridFsId = t?.gridFsId ?? t?.raw?.gridFsId ?? t?._id;
-
-      // Build a fully-qualified playable URL pointing to the backend
-      let url = '';
-      if (storageUrl) {
-        if (/^https?:\/\//i.test(storageUrl)) {
-          url = storageUrl;
-        } else if (storageUrl.startsWith('/api')) {
-          // if storageUrl already includes /api prefix, attach to backend origin
-          const backendOrigin = (api.defaults.baseURL || '').replace(/\/api$/, '');
-          url = backendOrigin + storageUrl;
-        } else {
-          // attach under the API base (which already includes /api)
-          url = (api.defaults.baseURL || '') + (storageUrl.startsWith('/') ? storageUrl : `/${storageUrl}`);
-        }
-      } else if (gridFsId) {
-        // fallback to the GridFS streaming endpoint on the backend
-        url = (api.defaults.baseURL || '') + `/sounds/stream/${gridFsId}`;
-      }
-
-      return {
-        _id: id,
-        title: String(t?.title ?? 'Untitled Soundscape'),
-        url: String(url),
-        cover: t?.cover ?? t?.image ?? '/fallback-cover.png',
-        artist: t?.artist ?? 'Unknown Artist',
-        category: t?.category ?? 'Music',
-        raw: t ?? {},
-      };
-    });
+    return normalizeTrackList(tracksArray);
 
   } catch (error) {
 

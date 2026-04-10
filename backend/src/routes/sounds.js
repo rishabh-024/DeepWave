@@ -7,44 +7,52 @@ import Track from '../models/Track.js';
 const createSoundsRouter = (upload) => {
   const router = express.Router();
 
-  const debugMiddleware = (req, res, next) => {
-    console.log('--- Request Received ---');
-    console.log('Method:', req.method);
-    console.log('URL:', req.url);
-    next();
-  };
-
   router.post(
     '/',
-    debugMiddleware,
     authMiddleware,
     requireAdmin,
-    upload.single('audio'),
+    upload.fields([
+      { name: 'audio', maxCount: 1 },
+      { name: 'cover', maxCount: 1 },
+    ]),
     async (req, res) => {
-      console.log('Multer processing complete.');
-      console.log('Request file (req.file):', req.file);
-      console.log('Request body (req.body):', req.body);
+      const audioFile = req.files?.audio?.[0];
+      const coverFile = req.files?.cover?.[0];
 
-      if (!req.file) {
-        console.log('Upload failed: req.file is missing.');
+      if (!audioFile) {
         return res.status(400).json({ error: { code: 'NO_FILE', message: 'No audio file was uploaded or it was rejected by the server.' } });
       }
 
       try {
-        const { title, category, tags, cover, durationSec } = req.body;
+        const title = String(req.body.title || '').trim();
+        const category = String(req.body.category || '').trim();
+        const tags = String(req.body.tags || '')
+          .split(',')
+          .map((tag) => tag.trim())
+          .filter(Boolean);
+        const durationSec = Number(req.body.durationSec || 120);
+        const artist = String(req.body.artist || 'DeepWave').trim();
+        const description = String(req.body.description || '').trim();
 
         if (!title || !category) {
             return res.status(400).json({ error: { code: 'MISSING_METADATA', message: 'Title and category are required.' } });
         }
 
+        const coverUrl = coverFile
+          ? `/api/sounds/stream/${coverFile.id}`
+          : '';
+
         const newTrack = new Track({
           title,
+          artist,
           category,
-          tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
-          cover: cover || 'https://placehold.co/600x400/0b1021/ffffff?text=DeepWave',
-          durationSec: durationSec || 120,
-          storageUrl: `/api/sounds/stream/${req.file.id}`,
-          gridFsId: req.file.id,
+          tags,
+          cover: coverUrl,
+          description,
+          durationSec: Number.isFinite(durationSec) ? durationSec : 120,
+          storageUrl: `/api/sounds/stream/${audioFile.id}`,
+          gridFsId: audioFile.id,
+          coverGridFsId: coverFile?.id || null,
           source: 'Admin Upload',
           isActive: true,
         });
@@ -54,7 +62,7 @@ const createSoundsRouter = (upload) => {
         res.status(201).json({
           message: 'File uploaded and track created successfully!',
           track: newTrack,
-          file: req.file,
+          file: audioFile,
         });
 
       } catch (error) {
@@ -75,7 +83,7 @@ const createSoundsRouter = (upload) => {
 
         const file = await gfs.find({ _id: fileId }).next();
 
-        if (!file || file.length === 0) {
+        if (!file) {
             return res.status(404).json({ error: 'File not found.' });
         }
 
@@ -113,7 +121,6 @@ const createSoundsRouter = (upload) => {
           const gridFsId = new mongoose.Types.ObjectId(track.gridFsId);
           try {
             await gfs.delete(gridFsId);
-            console.log(`Deleted GridFS file with ID: ${gridFsId}`);
           } catch (deleteError) {
             if (deleteError.message.includes('File not found')) {
               console.warn(`GridFS file already missing for ID: ${gridFsId}`);
@@ -123,8 +130,18 @@ const createSoundsRouter = (upload) => {
           }
         }
 
+        if (track.coverGridFsId && mongoose.Types.ObjectId.isValid(track.coverGridFsId)) {
+          const coverGridFsId = new mongoose.Types.ObjectId(track.coverGridFsId);
+          try {
+            await gfs.delete(coverGridFsId);
+          } catch (deleteError) {
+            if (!deleteError.message.includes('File not found')) {
+              throw deleteError;
+            }
+          }
+        }
+
         await Track.findByIdAndDelete(req.params.id);
-        console.log(`Deleted track metadata for ID: ${req.params.id}`);
 
         return res.status(200).json({ message: `Track "${track.title}" successfully deleted (missing file handled safely).` });
 

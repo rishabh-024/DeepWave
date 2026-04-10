@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, Music2 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import { useAudioPlayer } from '../../../context/AudioContext';
+import TrackArtwork from '../../../components/ui/TrackArtwork';
 
 function TrackCard({ track, playlist }) {
   const {
@@ -26,18 +27,19 @@ function TrackCard({ track, playlist }) {
     <motion.div
       layout
       whileHover={{ y: -8 }}
-      className="group relative rounded-2xl overflow-hidden surface border border-surface backdrop-blur-xl hover:surface transition cursor-pointer"
+      className="group relative overflow-hidden rounded-2xl surface shadow-[0_18px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl transition hover:shadow-[0_24px_50px_rgba(79,70,229,0.12)] cursor-pointer dark:shadow-[0_18px_40px_rgba(2,6,23,0.28)]"
     >
       {/* Cover */}
       <div className="relative aspect-[4/5] overflow-hidden">
-        <img
-          src={track.cover || '/fallback-cover.png'}
+        <TrackArtwork
+          src={track.cover}
           alt={track.title || 'Soundscape'}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          title={track.title}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-80" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-t from-slate-950/58 via-slate-950/12 to-transparent dark:from-black/70 dark:via-black/30" />
 
         {/* Play / Pause */}
         <div className="absolute inset-0 flex items-center justify-center">
@@ -81,13 +83,13 @@ function TrackCard({ track, playlist }) {
       </div>
 
       {/* Info */}
-      <div className="p-4">
-        <h3 className="text-white font-semibold truncate">
+      <div className="border-t border-slate-900/6 p-4 dark:border-white/10">
+        <h3 className="truncate text-base font-semibold text-slate-900 dark:text-white">
           {track.title || 'Untitled Sound'}
         </h3>
 
-        <div className="flex items-center gap-2 mt-1 text-sm text-white/60">
-          <Music2 className="h-4 w-4 text-violet-400" />
+        <div className="mt-1 flex items-center gap-2 text-sm text-slate-500 dark:text-white/60">
+          <Music2 className="h-4 w-4 text-violet-500 dark:text-violet-400" />
           <span className="capitalize truncate">
             {track.category || 'Sound'}
           </span>

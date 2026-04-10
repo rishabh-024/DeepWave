@@ -5,6 +5,10 @@ const TrackSchema = new mongoose.Schema({
     type: String,
     required: true 
   },
+  artist: {
+    type: String,
+    default: 'DeepWave'
+  },
   category: { 
     type: String, 
     enum: [
@@ -28,6 +32,26 @@ const TrackSchema = new mongoose.Schema({
   storageUrl: { 
     type: String, 
     required: true 
+  },
+  cover: {
+    type: String,
+    default: ''
+  },
+  description: {
+    type: String,
+    default: ''
+  },
+  gridFsId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
+  },
+  coverGridFsId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
+  },
+  source: {
+    type: String,
+    default: 'DeepWave'
   },
   tags: [String],
   isActive: { 

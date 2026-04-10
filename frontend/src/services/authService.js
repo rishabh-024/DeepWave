@@ -1,4 +1,4 @@
-import api from './api';
+import api, { extractApiErrorMessage } from './api';
 
 const login = async (credentials) => {
   try {
@@ -9,7 +9,7 @@ const login = async (credentials) => {
     return response.data;
   } catch (error) {
     console.error("Login failed:", error.response?.data || error.message);
-    throw error.response?.data || new Error("Login failed");
+    throw new Error(extractApiErrorMessage(error, "Login failed"));
   }
 };
 
@@ -22,7 +22,7 @@ const register = async (userData) => {
     return response.data;
   } catch (error) {
     console.error("Registration failed:", error.response?.data || error.message);
-    throw error.response?.data || new Error("Registration failed");
+    throw new Error(extractApiErrorMessage(error, "Registration failed"));
   }
 };
 

@@ -13,7 +13,7 @@ const CATEGORIES = [
 ];
 
 const AudioUploader = ({ onUploadSuccess }) => {
-    const { user, token } = useAuth();
+    const { user } = useAuth();
     const [selectedFile, setSelectedFile] = useState(null);
     const [coverFile, setCoverFile] = useState(null);
     const [coverPreview, setCoverPreview] = useState(null);
@@ -139,9 +139,9 @@ const AudioUploader = ({ onUploadSuccess }) => {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-4xl mx-auto p-6 sm:p-8 border border-white/10 bg-slate-900/50 rounded-2xl shadow-2xl backdrop-blur-xl"
+            className="mx-auto w-full max-w-4xl rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/50 dark:shadow-2xl sm:p-8"
         >
-            <h2 className="text-2xl font-bold text-white mb-6">Upload New Soundscape</h2>
+            <h2 className="mb-6 text-2xl font-bold text-slate-900 dark:text-white">Upload New Soundscape</h2>
             
             <AnimatePresence mode="wait">
                 {!selectedFile ? (
@@ -183,31 +183,31 @@ const AudioUploader = ({ onUploadSuccess }) => {
                             </div>
 
                             <div className="md:col-span-2 space-y-4">
-                                <div className="p-3 rounded-lg bg-slate-800/70 border border-white/10 flex items-center justify-between">
+                                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-100 p-3 dark:border-white/10 dark:bg-slate-800/70">
                                     <div className="flex items-center gap-3 min-w-0">
                                         <Music className="h-6 w-6 text-violet-400 flex-shrink-0" />
-                                        <p className="text-white font-medium truncate">{selectedFile.name}</p>
+                                        <p className="truncate font-medium text-slate-900 dark:text-white">{selectedFile.name}</p>
                                     </div>
                                     <button type="button" onClick={() => setSelectedFile(null)} className="p-1 rounded-full text-gray-400 hover:bg-white/10 hover:text-white" title="Change audio file">
                                         <X className="h-5 w-5" />
                                     </button>
                                 </div>
                                 <div>
-                                    <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-1">Title</label>
-                                    <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full bg-slate-800 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:outline-none" />
+                                    <label htmlFor="title" className="mb-1 block text-sm font-medium text-slate-600 dark:text-gray-300">Title</label>
+                                    <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:border-white/20 dark:bg-slate-800 dark:text-white dark:placeholder-gray-400" />
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-1">Category</label>
-                                        <select id="category" value={category} onChange={(e) => setCategory(e.target.value)} required className="w-full bg-slate-800 border border-white/20 rounded-lg py-2.5 px-3 text-white focus:ring-2 focus:ring-violet-500 focus:outline-none">
+                                        <label htmlFor="category" className="mb-1 block text-sm font-medium text-slate-600 dark:text-gray-300">Category</label>
+                                        <select id="category" value={category} onChange={(e) => setCategory(e.target.value)} required className="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:border-white/20 dark:bg-slate-800 dark:text-white">
                                             {CATEGORIES.map(cat => (
                                                 <option key={cat.value} value={cat.value}>{cat.label}</option>
                                             ))}
                                         </select>
                                     </div>
                                     <div>
-                                        <label htmlFor="tags" className="block text-sm font-medium text-gray-300 mb-1">Tags (comma-separated)</label>
-                                        <input type="text" id="tags" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="e.g. calm, focus" className="w-full bg-slate-800 border border-white/20 rounded-lg py-2 px-3 text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:outline-none" />
+                                        <label htmlFor="tags" className="mb-1 block text-sm font-medium text-slate-600 dark:text-gray-300">Tags (comma-separated)</label>
+                                        <input type="text" id="tags" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="e.g. calm, focus" className="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:border-white/20 dark:bg-slate-800 dark:text-white dark:placeholder-gray-400" />
                                     </div>
                                 </div>
                                 

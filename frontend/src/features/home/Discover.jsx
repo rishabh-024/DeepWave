@@ -59,13 +59,13 @@ function Discover() {
           variants={cardVariants}
           className="text-center mb-14"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-text-primary">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-primary">
             Designed for Your{' '}
             <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
               Mental Well-Being
             </span>
           </h2>
-          <p className="mt-4 text-white/60 max-w-2xl mx-auto">
+          <p className="mt-4 text-secondary max-w-2xl mx-auto">
             DeepWave combines neuroscience, sound design, and personalization
             to help you feel better—every day.
           </p>
@@ -86,14 +86,14 @@ function Discover() {
                 <div
                   className={`inline-flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br ${feature.accent} mb-5`}
                 >
-                  <Icon className="h-6 w-6 text-text-primary" />
+                  <Icon className="h-6 w-6 text-white" />
                 </div>
 
                 {/* Content */}
-                <h3 className="text-lg font-semibold text-text-primary mb-2">
+                <h3 className="text-lg font-semibold text-primary mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-white/60 leading-relaxed">
+                <p className="text-sm text-secondary leading-relaxed">
                   {feature.description}
                 </p>
 

@@ -37,12 +37,12 @@ const MoodLogger = ({ onMoodLogged }) => {
 
     return (
         <div className="w-full">
-            <h3 className="text-2xl font-bold text-white mb-2">How are you feeling right now?</h3>
-            <p className="text-gray-400 mb-6">Logging your mood helps us tailor the perfect sounds for you.</p>
+            <h3 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">How are you feeling right now?</h3>
+            <p className="mb-6 text-slate-500 dark:text-gray-400">Logging your mood helps us tailor the perfect sounds for you.</p>
             
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-3">1. Select your current mood</label>
+                    <label className="mb-3 block text-sm font-medium text-slate-600 dark:text-gray-300">1. Select your current mood</label>
                     <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                         {MOOD_OPTIONS.map(({ name, icon }) => (
                             <motion.button
@@ -52,7 +52,7 @@ const MoodLogger = ({ onMoodLogged }) => {
                                 className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all duration-200 border-2 ${
                                     selectedMood === name
                                         ? 'bg-violet-600/30 border-violet-500 text-white'
-                                        : 'bg-white/5 border-transparent hover:border-white/20 text-gray-300'
+                                        : 'bg-slate-100 border-transparent text-slate-600 hover:border-slate-300 dark:bg-white/5 dark:text-gray-300 dark:hover:border-white/20'
                                 }`}
                                 whileTap={{ scale: 0.95 }}
                             >
@@ -64,14 +64,14 @@ const MoodLogger = ({ onMoodLogged }) => {
                 </div>
 
                 <div>
-                    <label htmlFor="notes" className="block text-sm font-medium text-gray-300 mb-2">2. Add some notes (optional)</label>
+                    <label htmlFor="notes" className="mb-2 block text-sm font-medium text-slate-600 dark:text-gray-300">2. Add some notes (optional)</label>
                     <textarea
                         id="notes"
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         rows="3"
                         placeholder="What's on your mind? The more details, the better the recommendations."
-                        className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition"
+                        className="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-slate-900 placeholder-slate-400 transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-gray-500"
                     />
                 </div>
                 

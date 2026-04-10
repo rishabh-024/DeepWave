@@ -104,7 +104,7 @@ export const AudioProvider = ({ children }) => {
   const playTrack = useCallback((track, contextPlaylist = []) => {
     if (!track?.url) return;
 
-    setPlaylist(contextPlaylist);
+    setPlaylist(contextPlaylist.length ? contextPlaylist : [track]);
     setCurrentTrack(track);
     shuffledOrderRef.current = [];
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   motion,
   AnimatePresence,
@@ -18,27 +18,20 @@ import {
   LogOut,
   Users,
   User,
-  ChevronDown,
-  BookOpen,
-  Trophy,
-  LifeBuoy,
-  Instagram,
-  Twitter,
-  Youtube,
   Sparkles
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import Logo from './Logo';
 
 const Navbar = () => {
-  const { pathname } = useLocation();
-  const { isAuthenticated, logout } = useAuth();
+  const { pathname, hash } = useLocation();
+  const { isAuthenticated, logout, user } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
-  const [isLight, setIsLight] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [communityOpen, setCommunityOpen] = useState(false);
 
   const { scrollY } = useScroll();
   const width = useTransform(scrollY, [0, 120], ['100%', '92%']);
@@ -54,32 +47,31 @@ const Navbar = () => {
   const smoothPadding = useSpring(padding, springConfig);
   const smoothLogoScale = useSpring(logoScale, springConfig);
 
+  const isLight = !isDark;
+
   const navLinks = useMemo(() => [
     { label: 'Home', path: '/', icon: Home },
-    { label: 'Library', path: '/library', icon: Music },
-    { label: 'Studio', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'Updates', path: '/updates', icon: Bell },
-  ], []);
+    { label: 'Library', path: '/#library', icon: Music },
+    { label: 'Community', path: '/community', icon: Users },
+    {
+      label: 'Studio',
+      path: isAuthenticated ? '/dashboard' : '/login',
+      icon: LayoutDashboard,
+    },
+    {
+      label: user?.role === 'admin' ? 'Admin' : 'Profile',
+      path: isAuthenticated ? (user?.role === 'admin' ? '/admin' : '/profile') : '/register',
+      icon: user?.role === 'admin' ? Bell : User,
+    },
+  ], [isAuthenticated, user?.role]);
 
-  const communityItems = [
-    { title: "Journal", desc: "Mindfulness tips & stories", icon: BookOpen, path: "/blog" },
-    { title: "Challenges", desc: "Join wave sessions with others", icon: Trophy, path: "/playoffs" },
-    { title: "Support", desc: "Help center & guidance", icon: LifeBuoy, path: "/help" },
-  ];
+  const isActiveLink = (path) => {
+    if (path.includes('#')) {
+      const [basePath, anchor] = path.split('#');
+      return pathname === (basePath || '/') && hash === `#${anchor}`;
+    }
 
-  useEffect(() => {
-    const stored = localStorage.getItem('theme');
-    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-    const light = stored === 'light' || (!stored && prefersLight);
-    setIsLight(light);
-    document.documentElement.classList.toggle('light', light);
-  }, []);
-
-  const toggleTheme = () => {
-    const next = !isLight;
-    setIsLight(next);
-    document.documentElement.classList.toggle('light', next);
-    localStorage.setItem('theme', next ? 'light' : 'dark');
+    return pathname === path;
   };
 
   return (
@@ -108,7 +100,7 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1 p-1 rounded-full border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
             {navLinks.map((item) => {
-              const active = pathname === item.path;
+              const active = isActiveLink(item.path);
               return (
                 <Link
                   key={item.label}
@@ -130,44 +122,6 @@ const Navbar = () => {
                 </Link>
               );
             })}
-
-            {/* Community Dropdown */}
-            <div className="relative" onMouseEnter={() => setCommunityOpen(true)} onMouseLeave={() => setCommunityOpen(false)}>
-              <button className={`flex items-center gap-2 px-5 py-2 text-sm font-bold rounded-full transition-all ${isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-white'}`}>
-                <Users size={16} className="text-indigo-500/70" />
-                Community
-                <motion.span animate={{ rotate: communityOpen ? 180 : 0 }}><ChevronDown size={14} /></motion.span>
-              </button>
-              <AnimatePresence>
-                {communityOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className={`absolute left-0 mt-3 w-80 rounded-3xl border p-4 shadow-2xl backdrop-blur-2xl ${isLight ? 'bg-white border-slate-200 shadow-slate-200/50' : 'bg-slate-900 border-white/10 shadow-black/50'}`}
-                  >
-                    <div className="space-y-1">
-                      {communityItems.map((item) => (
-                        <Link key={item.title} to={item.path} className={`flex gap-4 p-3 rounded-2xl transition-all ${isLight ? 'hover:bg-slate-100' : 'hover:bg-white/5'}`}>
-                          <item.icon size={20} className="text-indigo-500 mt-1" />
-                          <div>
-                            <div className={`font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>{item.title}</div>
-                            <div className="text-xs text-slate-500">{item.desc}</div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                    <div className={`my-4 h-px ${isLight ? 'bg-slate-200' : 'bg-white/5'}`} />
-                    <div className="flex items-center justify-between px-2">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Connect</span>
-                      <div className="flex gap-3">
-                        <Instagram size={14} className="cursor-pointer text-slate-500 hover:text-indigo-500" />
-                        <Twitter size={14} className="cursor-pointer text-slate-500 hover:text-indigo-500" />
-                        <Youtube size={14} className="cursor-pointer text-slate-500 hover:text-indigo-500" />
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
           </div>
 
           {/* Action Buttons */}
@@ -184,12 +138,12 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <>
                   <Link 
-                    to="/profile"
+                    to={user?.role === 'admin' ? '/admin' : '/profile'}
                     className={`w-11 h-11 flex items-center justify-center rounded-2xl border transition-all
                     ${isLight ? 'bg-indigo-50 border-indigo-100 text-indigo-600 hover:bg-indigo-600 hover:text-white shadow-sm' : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white'}`}
-                    title="Profile"
+                    title={user?.role === 'admin' ? 'Admin dashboard' : 'Profile'}
                   >
-                    <User size={18} />
+                    {user?.role === 'admin' ? <Bell size={18} /> : <User size={18} />}
                   </Link>
                   <button
                     onClick={logout}
@@ -201,7 +155,7 @@ const Navbar = () => {
                 </>
               ) : (
                 <Link
-                  to="/login"
+                  to="/register"
                   className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-indigo-600 text-white font-black text-sm shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 hover:-translate-y-0.5 transition-all"
                 >
                   <Sparkles size={16} />
@@ -232,15 +186,28 @@ const Navbar = () => {
 
               <nav className="flex flex-col gap-4 flex-1">
                 {isAuthenticated && (
-                  <Link
-                    to="/profile"
-                    onClick={() => setMobileOpen(false)}
-                    className={`text-2xl font-black p-4 rounded-3xl transition-all flex items-center justify-between
-                    ${pathname === '/profile' ? 'bg-indigo-600 text-white' : isLight ? 'text-slate-800 hover:bg-slate-50' : 'text-slate-300 hover:bg-white/5'}`}
-                  >
-                    Profile
-                    <User size={20} className="opacity-50" />
-                  </Link>
+                  <>
+                    <Link
+                      to={user?.role === 'admin' ? '/admin' : '/profile'}
+                      onClick={() => setMobileOpen(false)}
+                      className={`text-2xl font-black p-4 rounded-3xl transition-all flex items-center justify-between
+                      ${(user?.role === 'admin' ? pathname === '/admin' : pathname === '/profile') ? 'bg-indigo-600 text-white' : isLight ? 'text-slate-800 hover:bg-slate-50' : 'text-slate-300 hover:bg-white/5'}`}
+                    >
+                      {user?.role === 'admin' ? 'Admin' : 'Profile'}
+                      {user?.role === 'admin' ? <Bell size={20} className="opacity-50" /> : <User size={20} className="opacity-50" />}
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setMobileOpen(false);
+                      }}
+                      className={`text-2xl font-black p-4 rounded-3xl transition-all flex items-center justify-between text-left w-full
+                      ${isLight ? 'text-red-600 hover:bg-red-50' : 'text-red-400 hover:bg-red-500/10'}`}
+                    >
+                      Logout
+                      <LogOut size={20} className="opacity-50" />
+                    </button>
+                  </>
                 )}
                 {navLinks.map((item) => (
                   <Link
@@ -248,7 +215,7 @@ const Navbar = () => {
                     to={item.path}
                     onClick={() => setMobileOpen(false)}
                     className={`text-2xl font-black p-4 rounded-3xl transition-all flex items-center justify-between
-                    ${pathname === item.path ? 'bg-indigo-600 text-white' : isLight ? 'text-slate-800 hover:bg-slate-50' : 'text-slate-300 hover:bg-white/5'}`}
+                    ${isActiveLink(item.path) ? 'bg-indigo-600 text-white' : isLight ? 'text-slate-800 hover:bg-slate-50' : 'text-slate-300 hover:bg-white/5'}`}
                   >
                     {item.label}
                     <item.icon size={20} className="opacity-50" />
@@ -257,7 +224,13 @@ const Navbar = () => {
               </nav>
 
               <div className="mt-auto pt-10 border-t border-black/5 dark:border-white/5">
-                <button className="w-full py-5 rounded-3xl bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-black text-lg shadow-2xl shadow-indigo-500/30">Upgrade to Pro</button>
+                <Link
+                  to={isAuthenticated ? '/dashboard' : '/register'}
+                  onClick={() => setMobileOpen(false)}
+                  className="block w-full rounded-3xl bg-gradient-to-r from-indigo-600 to-sky-600 py-5 text-center text-lg font-black text-white shadow-2xl shadow-indigo-500/30"
+                >
+                  {isAuthenticated ? 'Open Studio' : 'Start Free'}
+                </Link>
               </div>
             </motion.div>
           </motion.div>

@@ -12,6 +12,7 @@ import { RateLimiterMemory } from 'rate-limiter-flexible';
 dotenv.config();
 
 import analyzeRoute from './routes/analyze.js';
+import { analyzeText } from './services/nlpManager.js';
 
 const app = express();
 const server = createServer(app);
@@ -22,7 +23,6 @@ const io = new Server(server, {
   }
 });
 
-// Logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
@@ -40,11 +40,10 @@ const logger = winston.createLogger({
   ]
 });
 
-// Rate limiter
 const rateLimiter = new RateLimiterMemory({
   keyPrefix: 'nlp',
-  points: 100, // Number of requests
-  duration: 60, // Per 60 seconds
+  points: 100,
+  duration: 60,
 });
 
 app.use(helmet());
@@ -52,7 +51,6 @@ app.use(cors());
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 
-// Rate limiting middleware
 app.use(async (req, res, next) => {
   try {
     await rateLimiter.consume(req.ip);
@@ -64,10 +62,8 @@ app.use(async (req, res, next) => {
 
 app.use('/api', analyzeRoute);
 
-// Health check
 app.get('/healthz', (req, res) => res.json({ ok: true, uptime: process.uptime() }));
 
-// Socket.IO for real-time analysis
 io.on('connection', (socket) => {
   logger.info('Client connected:', socket.id);
 

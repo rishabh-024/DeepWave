@@ -49,13 +49,13 @@ function Recommendations() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full surface border border-white/10 mb-3">
             <Sparkles className="h-4 w-4 text-cyan-400" />
-            <span className="text-xs text-text-secondary">Personalized for you</span>
+            <span className="text-xs text-secondary">Personalized for you</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-bold text-primary tracking-tight">
             Recommended Soundscapes
           </h2>
-          <p className="mt-2 text-white/60 max-w-xl">
+          <p className="mt-2 text-secondary max-w-xl">
             Based on your listening patterns, mood insights, and preferences.
           </p>
         </div>
@@ -80,7 +80,7 @@ function Recommendations() {
         </div>
       ) : tracks.length === 0 || error ? (
         <div className="rounded-2xl p-10 surface border border-white/10 text-center">
-          <p className="text-text-secondary">
+          <p className="text-secondary">
             We’re still learning your preferences.  
             Explore a few soundscapes to unlock personalized recommendations.
           </p>

@@ -6,20 +6,32 @@ import {
   logout as logoutService
 } from '../services/authService.js';
 import api from '../services/api.js';
+import { useToast } from '../components/ui/Toast';
 
 const AuthContext = createContext(null);
+
+const decodeTokenSafely = (token) => {
+  const decodedUser = jwtDecode(token);
+
+  if (decodedUser?.exp && decodedUser.exp * 1000 <= Date.now()) {
+    throw new Error('Token has expired');
+  }
+
+  return decodedUser;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
+  const { success, error } = useToast();
 
   // --- Restore session from localStorage ---
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       try {
-        const decodedUser = jwtDecode(storedToken);
+        const decodedUser = decodeTokenSafely(storedToken);
         setUser(decodedUser);
         setToken(storedToken);
         api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
@@ -50,20 +62,22 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await loginService(credentials);
       if (data?.token) {
-        const decodedUser = jwtDecode(data.token);
+        const decodedUser = decodeTokenSafely(data.token);
         setUser(decodedUser);
         setToken(data.token);
         localStorage.setItem('token', data.token);
         api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+        success('Welcome back!', `Hello ${decodedUser.name || decodedUser.email}!`);
       }
       return data;
     } catch (err) {
       console.error('Login failed:', err);
+      error('Login Failed', err.message || 'Please check your credentials and try again.');
       throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [success, error]);
 
   // --- Register ---
   const register = useCallback(async (userData) => {
@@ -71,20 +85,22 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await registerService(userData);
       if (data?.token) {
-        const decodedUser = jwtDecode(data.token);
+        const decodedUser = decodeTokenSafely(data.token);
         setUser(decodedUser);
         setToken(data.token);
         localStorage.setItem('token', data.token);
         api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+        success('Account Created!', `Welcome ${decodedUser.name || decodedUser.email}! Your account has been created successfully.`);
       }
       return data;
     } catch (err) {
       console.error('Registration failed:', err);
+      error('Registration Failed', err.message || 'Please check your information and try again.');
       throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [success, error]);
 
   // --- Logout ---
   const logout = useCallback(() => {
@@ -97,7 +113,8 @@ export const AuthProvider = ({ children }) => {
     delete api.defaults.headers.common['Authorization'];
     setUser(null);
     setToken(null);
-  }, []);
+    success('Logged Out', 'You have been successfully logged out. See you soon!');
+  }, [success]);
 
   const value = {
     user,

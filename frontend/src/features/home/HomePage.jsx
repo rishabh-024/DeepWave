@@ -5,6 +5,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Music2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 import Shell from '../../app/Shell';
 import Hero from './Hero';
@@ -26,6 +27,7 @@ const sectionVariants = {
 };
 
 function HomePage() {
+  const { hash } = useLocation();
   const [tracks, setTracks] = useState([]);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -55,6 +57,17 @@ function HomePage() {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+    if (!hash) return;
+
+    const targetElement = document.getElementById(hash.replace('#', ''));
+    if (targetElement) {
+      requestAnimationFrame(() => {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  }, [hash]);
+
   /* -------------------- FILTER -------------------- */
   const filteredTracks = useMemo(() => {
     if (!query.trim()) return tracks;
@@ -78,6 +91,7 @@ function HomePage() {
 
       {/* LIBRARY */}
       <motion.section
+        id="library"
         className="mt-24 sm:mt-32"
         variants={sectionVariants}
         initial="hidden"
@@ -85,14 +99,14 @@ function HomePage() {
         viewport={{ once: true, amount: 0.2 }}
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-text-primpary">
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-primary">
             Sound{' '}
             <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
               Library
             </span>
           </h2>
-          <div className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ring-1 ring-white/10 surface backdrop-blur-sm">
-            <Music2 className="h-4 w-4 text-violet-300" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 px-4 py-2 text-sm font-medium surface shadow-sm shadow-slate-200/60 backdrop-blur-sm dark:border-white/10 dark:shadow-none">
+            <Music2 className="h-4 w-4 text-violet-500 dark:text-violet-300" />
             <span>{filteredTracks.length} Soundscapes</span>
           </div>
         </div>
@@ -106,6 +120,7 @@ function HomePage() {
 
       {/* RECOMMENDATIONS */}
       <motion.section
+        id="recommendations"
         className="mt-24 sm:mt-32"
         variants={sectionVariants}
         initial="hidden"
@@ -117,6 +132,7 @@ function HomePage() {
 
       {/* CTA */}
       <motion.section
+        id="personalize"
         className="mt-24 sm:mt-36 mb-32"
         variants={sectionVariants}
         initial="hidden"

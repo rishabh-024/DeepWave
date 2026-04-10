@@ -29,10 +29,10 @@ function EmptyState() {
       <div className="h-16 w-16 rounded-full surface flex items-center justify-center mb-6">
         <Music2 className="h-8 w-8 text-violet-400" />
       </div>
-      <h3 className="text-xl font-semibold text-text-primary mb-2">
+      <h3 className="text-xl font-semibold text-primary mb-2">
         No soundscapes found
       </h3>
-      <p className="text-white/60 max-w-sm">
+      <p className="text-secondary max-w-sm">
         Try adjusting your search or explore different moods to discover new
         experiences.
       </p>

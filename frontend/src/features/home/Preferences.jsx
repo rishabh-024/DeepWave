@@ -38,18 +38,18 @@ function Preferences() {
         viewport={{ once: true, amount: 0.4 }}
         className="max-w-4xl mx-auto px-4 sm:px-6"
       >
-        <div className="relative rounded-3xl p-10 sm:p-14 surface border border-surface backdrop-blur-xl text-center overflow-hidden">
+        <div className="relative rounded-3xl p-10 sm:p-14 surface backdrop-blur-xl text-center overflow-hidden">
           
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full surface border border-surface mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full surface mb-6">
             <Sparkles className="h-4 w-4 text-violet-400" />
-            <span className="text-sm text-white/70">
+            <span className="text-sm text-secondary">
               Personalized Experience
             </span>
           </div>
 
           {/* Headline */}
-          <h2 className="text-3xl sm:text-4xl font-bold text-text-primarytracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-bold text-primary tracking-tight">
             Design Your Personal{' '}
             <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
               Wellness Journey
@@ -57,7 +57,7 @@ function Preferences() {
           </h2>
 
           {/* Description */}
-          <p className="mt-5 text-white/60 max-w-2xl mx-auto">
+          <p className="mt-5 text-secondary max-w-2xl mx-auto">
             Tell us how you feel, what you want to improve, and how you prefer
             to listen. DeepWave adapts to you—every step of the way.
           </p>
@@ -67,7 +67,7 @@ function Preferences() {
             whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.96 }}
             onClick={handleClick}
-            className="mt-10 inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-text-primary font-semibold shadow-xl shadow-violet-600/30 hover:shadow-violet-600/50 transition"
+            className="mt-10 inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold shadow-xl shadow-violet-600/30 hover:shadow-violet-600/50 transition"
           >
             <Sliders className="h-5 w-5" />
             {isAuthenticated ? 'Customize My Experience' : 'Get Started'}
@@ -75,7 +75,7 @@ function Preferences() {
           </motion.button>
 
           {/* Subtext */}
-          <p className="mt-4 text-sm text-white/50">
+          <p className="mt-4 text-sm text-secondary">
             Takes less than a minute. You’re always in control.
           </p>
         </div>

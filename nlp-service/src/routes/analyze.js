@@ -73,7 +73,9 @@ function fallbackAnalysis(text) {
 
   return {
     emotion: detectedEmotion,
+    intent: `emotion.${detectedEmotion}`,
     confidence: Math.min(0.9, (maxMatches + 1) / 2),
+    answer: `I hear ${detectedEmotion === 'neutral' ? 'what you are sharing' : `that you may be feeling ${detectedEmotion}`}. Let me help you find a calming next step.`,
     suggestions: [
       'Take a moment to breathe deeply.',
       'Consider journaling your thoughts.',
@@ -91,7 +93,11 @@ router.post('/analyze-text', async (req, res) => {
 
   try {
     const result = await analyzeText(text);
-    res.json(result);
+    res.json({
+      ...result,
+      intent: result.intent || (result.emotion ? `emotion.${result.emotion}` : 'emotion.neutral'),
+      answer: result.answer || result.suggestions?.[0] || 'Let me help you find a supportive next step.',
+    });
   } catch (err) {
     logger.error('Analysis error:', err);
     res.status(500).json({ error: 'NLP service failed' });

@@ -25,7 +25,8 @@ const motivationalQuotes = [
 
 router.post('/log', authMiddleware, async (req, res) => {
   try {
-    const { mood, notes } = req.body;
+    const mood = String(req.body.mood || '').trim();
+    const notes = String(req.body.notes || '').trim().slice(0, 500);
     if (!mood) {
       return res.status(400).json({ error: { code: 'MISSING_FIELD', message: 'Mood is required.' } });
     }
@@ -36,7 +37,10 @@ router.post('/log', authMiddleware, async (req, res) => {
     const action = moodToActionMap[mood];
     let recommendations = [];
     if (action) {
-      recommendations = await Track.find({ tags: { $in: action.tags } }).limit(3).lean();
+      recommendations = await Track.find({ tags: { $in: action.tags }, isActive: true })
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .lean();
     }
 
     const quote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];

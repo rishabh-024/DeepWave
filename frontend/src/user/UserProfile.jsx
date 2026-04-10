@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   User,
   Settings,
@@ -19,40 +20,8 @@ import {
   Zap,
   Award
 } from 'lucide-react';
-
-/**
- * PREVIEW COMPATIBILITY LAYER
- * I have commented out the relative imports and provided mock versions
- * below to ensure the UI renders in this environment. 
- * Please restore your original imports in your local project:
- * import { useAuth } from '../context/AuthContext';
- * import api from '../services/api';
- */
-
-// Mock Auth Context for Preview
-const useAuth = () => ({
-  user: {
-    name: 'Rishbah Giri',
-    email: 'rishabhgiri054@gmail.com',
-    role: 'user', // Change to 'admin' to see Admin View
-  },
-  logout: () => console.log("Logout triggered")
-});
-
-// Mock API Service for Preview
-const api = {
-  get: () => Promise.resolve({
-    data: {
-      personalStats: { moodsLogged: 42, listeningTime: '18 hours', favoriteCategory: 'Nature' },
-      recentTracks: [
-        { id: 1, title: 'Peaceful Ocean Waves', category: 'Nature' },
-        { id: 2, title: 'Rain on a Tin Roof', category: 'Rain' },
-        { id: 3, title: 'Deep Focus Binaural Beats', category: 'Focus' },
-      ],
-      adminStats: { totalUsers: 1250, activeSessions: 78, totalTracks: 215, newSignupsToday: 12 }
-    }
-  })
-};
+import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 /**
  * Advanced Stat Card
@@ -222,7 +191,7 @@ const UserProfileView = ({ profile, stats, recentTracks, logout }) => (
   </motion.div>
 );
 
-const AdminDashboard = ({ user, stats }) => (
+const AdminDashboard = ({ user, stats, onOpenAdmin }) => (
     <motion.div 
       initial="hidden" 
       animate="visible" 
@@ -277,7 +246,7 @@ const AdminDashboard = ({ user, stats }) => (
               <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mb-8 leading-relaxed">
                 Review permissions, investigate reports, and monitor real-time system throughput from the centralized administration console.
               </p>
-              <button className="px-10 py-4 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-xl dark:shadow-none">
+              <button onClick={onOpenAdmin} className="px-10 py-4 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all shadow-xl dark:shadow-none">
                 Launch Admin Console
               </button>
             </div>
@@ -287,6 +256,7 @@ const AdminDashboard = ({ user, stats }) => (
 
 function UserProfile() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -327,7 +297,7 @@ function UserProfile() {
         </div>
         <h2 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white mb-3">Session Expired</h2>
         <p className="text-zinc-500 dark:text-zinc-400 mb-10 text-center max-w-xs leading-relaxed">Your session has timed out or you are not authorized. Please sign in again to continue.</p>
-        <button className="px-12 py-5 rounded-3xl bg-violet-600 text-white font-black uppercase tracking-widest text-xs shadow-2xl shadow-violet-600/30 hover:scale-105 active:scale-95 transition-all">
+        <button onClick={() => navigate('/login')} className="px-12 py-5 rounded-3xl bg-violet-600 text-white font-black uppercase tracking-widest text-xs shadow-2xl shadow-violet-600/30 hover:scale-105 active:scale-95 transition-all">
           Secure Login
         </button>
       </div>
@@ -338,7 +308,7 @@ function UserProfile() {
     <div className="py-12 bg-zinc-50 dark:bg-zinc-950 min-h-screen transition-colors duration-500">
       <AnimatePresence mode="wait">
         {user.role === 'admin' && profileData.adminStats ? (
-          <AdminDashboard key="admin" user={user} stats={profileData.adminStats} />
+          <AdminDashboard key="admin" user={user} stats={profileData.adminStats} onOpenAdmin={() => navigate('/admin')} />
         ) : (
           <UserProfileView 
             key="user"

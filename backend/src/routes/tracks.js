@@ -14,7 +14,8 @@ router.get('/', async (req, res) => {
     if (q) filter.$text = { $search: q };
 
     const tracks = await Track.find(filter)
-      .select('title category durationSec tags')
+      .select('title artist category durationSec tags storageUrl cover gridFsId source createdAt')
+      .sort({ createdAt: -1 })
       .limit(Number(limit))
       .lean();
 
@@ -46,13 +47,32 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', authMiddleware, requireAdmin, async (req, res) => {
   try {
-    const { title, category, durationSec, storageUrl, tags } = req.body;
+    const title = String(req.body.title || '').trim();
+    const category = String(req.body.category || '').trim();
+    const durationSec = Number(req.body.durationSec || 0);
+    const storageUrl = String(req.body.storageUrl || '').trim();
+    const artist = String(req.body.artist || 'DeepWave').trim();
+    const cover = String(req.body.cover || '').trim();
+    const tags = Array.isArray(req.body.tags)
+      ? req.body.tags
+      : String(req.body.tags || '')
+          .split(',')
+          .map((tag) => tag.trim())
+          .filter(Boolean);
+
+    if (!title || !category || !storageUrl) {
+      return res.status(400).json({
+        error: { code: 'invalid_input', message: 'Title, category, and storageUrl are required.' }
+      });
+    }
 
     const track = await Track.create({
       title,
+      artist,
       category,
       durationSec,
       storageUrl,
+      cover,
       tags,
       isActive: true
     });

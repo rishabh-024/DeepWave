@@ -50,17 +50,19 @@ function Hero({ onSearch, onSuggestionClick }) {
   return (
     <section 
       ref={containerRef}
-      className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-white dark:bg-slate-950 transition-colors duration-500"
+      className="relative min-h-[90vh] flex items-center justify-center bg-transparent transition-colors duration-500"
     >
-      {/* --- Animated Background Elements --- */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div 
           style={{ y: y1 }}
-          className="absolute -top-[10%] -left-[10%] w-[40%] h-[60%] rounded-full bg-violet-500/10 dark:bg-violet-600/20 blur-[120px]" 
+          className="absolute -top-40 -left-40 w-[35rem] h-[35rem]
+          rounded-full bg-violet-500/10 dark:bg-violet-600/20 blur-[140px]"
         />
+
         <motion.div 
           style={{ y: y2 }}
-          className="absolute top-[20%] -right-[5%] w-[30%] h-[50%] rounded-full bg-cyan-400/10 dark:bg-cyan-500/20 blur-[100px]" 
+          className="absolute -bottom-40 -right-40 w-[32rem] h-[32rem]
+          rounded-full bg-cyan-400/10 dark:bg-cyan-500/20 blur-[140px]"
         />
       </div>
 
@@ -105,7 +107,12 @@ function Hero({ onSearch, onSuggestionClick }) {
           className="mt-12 max-w-2xl mx-auto group"
         >
           <div className="relative flex items-center">
-            <Search className="absolute left-5 w-5 h-5 text-slate-400 group-focus-within:text-violet-500 transition-colors" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-5 top-1/2 z-10 -translate-y-1/2"
+            >
+              <Search className="w-5 h-5 text-slate-500 transition-colors group-focus-within:text-violet-500" />
+            </div>
             <input
               type="text"
               value={query}
@@ -156,7 +163,7 @@ function Hero({ onSearch, onSuggestionClick }) {
       </motion.div>
 
       {/* Subtle Bottom Fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-transparent via-transparent to-transparent pointer-events-none" />
     </section>
   );
 }

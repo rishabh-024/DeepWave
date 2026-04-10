@@ -14,7 +14,7 @@ const moodConfig = {
 
 const getMoodHistory = async () => {
     try {
-    const response = await api.get('/moods/history');
+    const response = await api.get('/mood/history');
     return response.data.history || response.data || [];
     } catch (error) {
         console.error('Error fetching mood history:', error);
@@ -78,15 +78,15 @@ const MoodHistory = () => {
         <div className="space-y-4">
             <div className="flex items-center gap-3">
                 <Activity className="w-6 h-6 text-cyan-300" />
-                <h3 className="text-xl font-bold text-white">Recent Moods</h3>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Recent Moods</h3>
             </div>
 
             {isLoading ? <MoodHistorySkeleton /> : 
              history.length === 0 ? (
-                <div className="text-center p-8 border border-dashed border-white/10 rounded-2xl">
-                    <Calendar className="mx-auto h-10 w-10 text-gray-500" />
-                    <h4 className="mt-4 text-md font-semibold text-white">No History Yet</h4>
-                    <p className="mt-1 text-sm text-gray-400">Log your mood to see your journey here.</p>
+                <div className="rounded-2xl border border-dashed border-slate-200 p-8 text-center dark:border-white/10">
+                    <Calendar className="mx-auto h-10 w-10 text-slate-400 dark:text-gray-500" />
+                    <h4 className="mt-4 text-md font-semibold text-slate-900 dark:text-white">No History Yet</h4>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">Log your mood to see your journey here.</p>
                 </div>
             ) : (
                 <motion.ul
@@ -100,18 +100,18 @@ const MoodHistory = () => {
                         return (
                             <motion.li
                                 key={entry._id}
-                                className={`p-3 rounded-lg bg-white/5 border-l-4 flex items-center gap-4 ${color}`}
+                                className={`flex items-center gap-4 rounded-lg border-l-4 bg-slate-100 p-3 dark:bg-white/5 ${color}`}
                                 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
                             >
-                                <div className="text-white/80">{React.cloneElement(icon, { className: "h-6 w-6" })}</div>
+                                <div className="text-slate-700 dark:text-white/80">{React.cloneElement(icon, { className: "h-6 w-6" })}</div>
                                 <div className="flex-1">
                                     <div className="flex justify-between items-baseline">
-                                        <p className="font-semibold text-white capitalize">{entry.mood}</p>
-                                        <p className="text-xs text-gray-400">
+                                        <p className="font-semibold capitalize text-slate-900 dark:text-white">{entry.mood}</p>
+                                        <p className="text-xs text-slate-500 dark:text-gray-400">
                                             {new Date(entry.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                         </p>
                                     </div>
-                                    {entry.notes && <p className="mt-1 text-sm text-gray-300 italic">"{entry.notes}"</p>}
+                                    {entry.notes && <p className="mt-1 text-sm italic text-slate-600 dark:text-gray-300">"{entry.notes}"</p>}
                                 </div>
                             </motion.li>
                         );

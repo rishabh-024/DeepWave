@@ -1,4 +1,4 @@
-import api from './api';
+import api, { extractApiErrorMessage } from './api';
 
 const sendMessage = async (message) => {
   try {
@@ -6,7 +6,7 @@ const sendMessage = async (message) => {
     return response.data;
   } catch (error) {
     console.error("Failed to send chat message:", error);
-    throw error.response?.data || new Error("Failed to get a reply from the server");
+    throw new Error(extractApiErrorMessage(error, "Failed to get a reply from the server"));
   }
 };
 

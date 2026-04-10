@@ -10,7 +10,7 @@ const MoodSchema = new mongoose.Schema({
   mood: {
     type: String,
     required: true,
-    enum: ['happy', 'calm', 'stressed', 'angry', 'sad', 'anxious', 'neutral'], // Predefined moods
+    enum: ['happy', 'calm', 'stressed', 'angry', 'sad', 'anxious', 'neutral'],
   },
   notes: {
     type: String,
@@ -27,7 +27,6 @@ const MoodSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Compound index for efficient queries
 MoodSchema.index({ user: 1, createdAt: -1 });
 
 const Mood = mongoose.model('Mood', MoodSchema);

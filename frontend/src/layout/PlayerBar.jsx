@@ -6,44 +6,8 @@ import {
   Volume2, VolumeX, Heart, Share2, X,
   Maximize2
 } from 'lucide-react';
-
-/**
- * PREVIEW COMPATIBILITY LAYER
- * I have added a fallback for useAudioPlayer to ensure the component 
- * compiles and renders correctly in this environment. 
- * Please restore your original import: 
- * import { useAudioPlayer } from '../context/AudioContext';
- */
-const useAudioPlayerFallback = () => {
-  try {
-    // Attempting to use the real context if it exists in your local environment
-    const context = require('../context/AudioContext');
-    return context.useAudioPlayer();
-  } catch (e) {
-    // Mock data for preview stability
-    return {
-      currentTrack: { 
-        id: '1', 
-        title: 'Liquid Serenity', 
-        artist: 'DeepWave Collective', 
-        cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=250&h=250&auto=format&fit=crop' 
-      },
-      isPlaying: false,
-      togglePlayPause: () => {},
-      playNext: () => {},
-      playPrev: () => {},
-      progress: 45,
-      duration: 180,
-      volume: 80,
-      setVolume: () => {},
-      seek: () => {},
-      isShuffle: false,
-      repeatMode: 'off',
-      toggleShuffle: () => {},
-      cycleRepeatMode: () => {}
-    };
-  }
-};
+import { useAudioPlayer } from '../context/AudioContext';
+import TrackArtwork from '../components/ui/TrackArtwork';
 
 const formatTime = (sec = 0) => {
   const s = Math.floor(sec);
@@ -86,7 +50,7 @@ function PlayerBar() {
     repeatMode,
     toggleShuffle,
     cycleRepeatMode
-  } = useAudioPlayerFallback();
+  } = useAudioPlayer();
 
   const [liked, setLiked] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -98,7 +62,7 @@ function PlayerBar() {
     if (currentTrack) {
       setIsDismissed(false);
     }
-  }, [currentTrack?.id]);
+  }, [currentTrack?._id]);
 
   if (!currentTrack || isDismissed) return null;
 
@@ -153,11 +117,11 @@ function PlayerBar() {
           {/* 1. Track Identification */}
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <div className="relative group/cover flex-shrink-0">
-              <motion.img
-                layoutId="playerCover"
+              <TrackArtwork
                 src={currentTrack.cover}
                 alt={currentTrack.title}
-                className="h-16 w-16 rounded-2xl object-cover shadow-xl ring-1 ring-black/5 dark:ring-white/5 group-hover/cover:scale-105 transition-transform duration-500"
+                title={currentTrack.title}
+                className="h-16 w-16 rounded-2xl object-cover shadow-xl ring-1 ring-black/5 transition-transform duration-500 group-hover/cover:scale-105 dark:ring-white/5"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/cover:opacity-100 rounded-2xl transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                 <Maximize2 className="text-white w-5 h-5" />
@@ -173,7 +137,7 @@ function PlayerBar() {
                 {currentTrack.title}
               </motion.h4>
               <p className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 truncate uppercase tracking-[0.2em] mt-0.5">
-                {currentTrack.artist}
+                {currentTrack.artist || 'DeepWave'}
               </p>
             </div>
 

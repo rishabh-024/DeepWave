@@ -1,6 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import { getGfs } from '../config/gridfs.js'; // Import our centralized getGfs instance
+import { getGfs } from '../config/gridfs.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();

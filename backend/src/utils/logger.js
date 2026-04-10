@@ -1,7 +1,6 @@
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
-// Define log levels
 const levels = {
   error: 0,
   warn: 1,
@@ -10,7 +9,6 @@ const levels = {
   debug: 4,
 };
 
-// Define colors for each level
 const colors = {
   error: 'red',
   warn: 'yellow',
@@ -21,7 +19,6 @@ const colors = {
 
 winston.addColors(colors);
 
-// Define format for logs
 const format = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.colorize({ all: true }),
@@ -30,9 +27,7 @@ const format = winston.format.combine(
   ),
 );
 
-// Define transports
 const transports = [
-  // Console transport for development
   new winston.transports.Console({
     format: winston.format.combine(
       winston.format.colorize(),
@@ -40,7 +35,6 @@ const transports = [
     )
   }),
 
-  // Error log file
   new DailyRotateFile({
     filename: 'logs/error-%DATE%.log',
     datePattern: 'YYYY-MM-DD',
@@ -54,7 +48,6 @@ const transports = [
     maxFiles: '14d',
   }),
 
-  // Combined log file
   new DailyRotateFile({
     filename: 'logs/combined-%DATE%.log',
     datePattern: 'YYYY-MM-DD',
@@ -67,8 +60,7 @@ const transports = [
   }),
 ];
 
-// Create the logger
-const logger = winston.createLogger({
+export const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   levels,
   format,

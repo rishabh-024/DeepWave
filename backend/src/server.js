@@ -20,37 +20,36 @@ import moodRoutes from './routes/mood.js' ;
 import recRoutes from './routes/recommendations.js' ;
 import chatRoutes from './routes/chat.js'
 import statsRoutes from './routes/stats.js'
+import healthRoutes from './routes/health.js';
 
 import createSoundsRouter from './routes/sounds.js';
 import processRoutes from './routes/process.js';
+import { requestIdMiddleware, correlationIdMiddleware } from './middleware/requestIdMiddleware.js';
+import { responseMiddleware } from './middleware/responseFormatter.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
-// Environment variables with defaults
 const PORT = process.env.PORT || 4000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const CORS_ORIGINS = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:5173', 'http://localhost:3000'];
-const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000;
 const RATE_LIMIT_MAX = parseInt(process.env.RATE_LIMIT_MAX) || 200;
 const TRUST_PROXY = process.env.TRUST_PROXY === 'true' || false;
 const CLUSTER_ENABLED = process.env.CLUSTER_ENABLED === 'true' || false;
 
-// Clustering for production scalability
 if (CLUSTER_ENABLED && cluster.isPrimary) {
   const numCPUs = os.cpus().length;
   logger.info(`Primary process ${process.pid} is running. Forking ${numCPUs} workers...`);
 
-  // Fork workers
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
 
-  // Handle worker exits
   cluster.on('exit', (worker, code, signal) => {
     logger.warn(`Worker ${worker.process.pid} died with code: ${code}, and signal: ${signal}`);
     logger.info('Starting a new worker');
     cluster.fork();
   });
 
-  // Graceful shutdown
   process.on('SIGTERM', () => {
     logger.info('SIGTERM received, shutting down gracefully');
     for (const id in cluster.workers) {
@@ -67,7 +66,6 @@ async function startServer() {
   try {
     const app = express();
 
-    // Security middleware
     app.use(helmet({
       contentSecurityPolicy: {
         directives: {
@@ -79,15 +77,12 @@ async function startServer() {
       },
     }));
 
-    // Trust proxy for rate limiting behind load balancers
     if (TRUST_PROXY) {
       app.set('trust proxy', 1);
     }
 
-    // CORS configuration
     app.use(cors({
       origin: function (origin, callback) {
-        // Allow requests with no origin (mobile apps, curl, etc.)
         if (!origin) return callback(null, true);
 
         if (CORS_ORIGINS.indexOf(origin) !== -1) {
@@ -102,35 +97,42 @@ async function startServer() {
       allowedHeaders: ['Content-Type', 'Authorization'],
     }));
 
-    // Compression
     app.use(compression());
 
-    // Body parsing
+    app.use(correlationIdMiddleware);
+    app.use(requestIdMiddleware);
+    app.use(responseMiddleware);
+
     app.use(express.json({
       limit: process.env.JSON_LIMIT || '50mb',
       verify: (req, res, buf) => {
+        if (!buf?.length) {
+          return;
+        }
+
         try {
-          JSON.parse(buf);
+          JSON.parse(buf.toString());
         } catch (e) {
           logger.error('Invalid JSON received', { error: e.message, body: buf.toString() });
-          res.status(400).json({ error: { code: 'invalid_json', message: 'Invalid JSON' } });
-          throw new Error('Invalid JSON');
+          e.statusCode = 400;
+          e.code = 'invalid_json';
+          throw e;
         }
       }
     }));
     app.use(express.urlencoded({ extended: true, limit: process.env.URLENCODED_LIMIT || '50mb' }));
 
-    // Logging middleware
     app.use(morgan('combined', {
       stream: {
         write: (message) => {
           logger.http(message.trim());
         }
       },
-      skip: (req, res) => res.statusCode < 400 // Only log errors and above
+      skip: (req, res) => res.statusCode < 400
     }));
 
-    // Rate limiting
+    app.use('/api', healthRoutes);
+
     const limiter = rateLimit({
       windowMs: RATE_LIMIT_WINDOW_MS,
       max: RATE_LIMIT_MAX,
@@ -158,7 +160,6 @@ async function startServer() {
     });
     app.use('/api/', limiter);
 
-    // Health check endpoint
     app.get('/healthz', (req, res) => {
       res.json({
         ok: true,
@@ -169,7 +170,8 @@ async function startServer() {
       });
     });
 
-    // API routes
+    app.get('/', (req, res) => res.json({ ok: true }));
+
     app.use('/api/auth', authRoutes);
     app.use('/api/tracks', tracksRoutes);
     app.use('/api/mood', moodRoutes);
@@ -178,7 +180,6 @@ async function startServer() {
     app.use('/api/process', processRoutes);
     app.use('/api/stats', statsRoutes);
 
-    // Connect to database
     await connectDB();
     await initGridFS();
 
@@ -186,43 +187,9 @@ async function startServer() {
     const soundsRouter = createSoundsRouter(uploadInstance);
     app.use('/api/sounds', soundsRouter);
 
-    // Global error handler
-    app.use((err, req, res, next) => {
-      logger.error('Unhandled error', {
-        error: err.message,
-        stack: err.stack,
-        url: req.url,
-        method: req.method,
-        ip: req.ip,
-        userAgent: req.get('User-Agent')
-      });
+    app.use(notFoundHandler);
+    app.use(errorHandler);
 
-      // Don't leak error details in production
-      const isDevelopment = NODE_ENV === 'development';
-      res.status(err.status || 500).json({
-        error: {
-          code: err.code || 'server_error',
-          message: isDevelopment ? err.message : 'Internal server error'
-        }
-      });
-    });
-
-    // 404 handler
-    app.use((req, res) => {
-      logger.warn('404 Not Found', {
-        url: req.url,
-        method: req.method,
-        ip: req.ip
-      });
-      res.status(404).json({
-        error: {
-          code: 'not_found',
-          message: 'Endpoint not found'
-        }
-      });
-    });
-
-    // Start server
     const server = app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT} in ${NODE_ENV} mode`, {
         pid: process.pid,
@@ -230,7 +197,6 @@ async function startServer() {
       });
     });
 
-    // Graceful shutdown
     const gracefulShutdown = (signal) => {
       logger.info(`Received ${signal}, shutting down gracefully`);
       server.close(() => {
@@ -238,7 +204,6 @@ async function startServer() {
         process.exit(0);
       });
 
-      // Force close after 10 seconds
       setTimeout(() => {
         logger.error('Could not close connections in time, forcefully shutting down');
         process.exit(1);
